@@ -1,0 +1,200 @@
+---
+swagger: "2.0"
+info:
+  description: "Access seismic on an HTTP server"
+  version: "1.0.0"
+  title: "Seismic Server API"
+host: "bgillock.synology.me:3000"
+basePath: "/seismic/v1"
+schemes:
+- "http"
+produces:
+- "application/json"
+paths:
+  /files:
+    get:
+      tags:
+      - "Files"
+      summary: "Seismic files"
+      description: "Returns a list of files that contain seismic.\n"
+      operationId: "filesGET"
+      parameters: []
+      responses:
+        200:
+          description: "An array of names"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/FileName"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Files"
+  /header:
+    get:
+      tags:
+      - "Header"
+      summary: "Header of file"
+      description: "Information on size and location of seismic cube\n"
+      operationId: "headerGET"
+      parameters:
+      - name: "file"
+        in: "query"
+        description: "File name"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Contents of the header of the file"
+          schema:
+            $ref: "#/definitions/Header"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Header"
+  /load:
+    post:
+      tags:
+      - "Load"
+      summary: "Load seismic"
+      operationId: "loadPOST"
+      parameters:
+      - in: "body"
+        name: "header"
+        description: "Header info"
+        required: false
+        schema:
+          $ref: "#/definitions/Header"
+      responses:
+        200:
+          description: "Upload successful"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Load"
+  /readLine:
+    get:
+      tags:
+      - "ReadLine"
+      summary: "Reads a line from the file from the start xline"
+      description: "A Base64 buffer is returned with the samples for the specified\
+        \ range. Number of samples per trace and bits per sample is from the header."
+      operationId: "readLineGET"
+      parameters:
+      - name: "file"
+        in: "query"
+        description: "File name"
+        required: true
+        type: "string"
+      - name: "line"
+        in: "query"
+        description: "inline using annotation coordinate"
+        required: true
+        type: "number"
+        format: "integer"
+      - name: "starXline"
+        in: "query"
+        description: "first xline using annotation coordinate"
+        required: true
+        type: "number"
+        format: "integer"
+      - name: "nTraces"
+        in: "query"
+        description: "number of traces to read"
+        required: true
+        type: "string"
+        format: "integer"
+      responses:
+        200:
+          description: "Buffer of seismic"
+          schema:
+            $ref: "#/definitions/Buffer"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "ReadLine"
+definitions:
+  FileName:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "name of file"
+  Header:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "Cube name"
+      nlines:
+        type: "number"
+        description: "Number of in-lines"
+      nxlines:
+        type: "number"
+        description: "Number of cross-lines"
+      nsamples:
+        type: "number"
+        description: "Number of samples in each trace"
+      originx:
+        type: "number"
+        description: "X coordinate of the origin (first inline,first xline)"
+      originy:
+        type: "number"
+        description: "Y coordinate of the origin (first inline,first xline)"
+      inlineendx:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      inlineendy:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      xlineendx:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      xlineendy:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      samplerate:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      annotinlinestart:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      annotinlineinc:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      annotxlinestart:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      annotxlineinc:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      minamp:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      maxamp:
+        type: "number"
+        description: "X coordinate of end of first inline"
+      bitspersample:
+        type: "number"
+        description: "X coordinate of end of first inline"
+  Buffer:
+    type: "object"
+    properties:
+      buff:
+        type: "string"
+        format: "base64"
+        description: "base64 string of requested size"
+  Error:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+      fields:
+        type: "string"
