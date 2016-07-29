@@ -1,9 +1,2 @@
-runtime: nodejs
+runtime: custom
 vm: true
-application: seismic
-threadsafe: true
-version: 1
-handlers:
-- url: /*
-  script: app.js
-  secure: always
